@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PSAITO · Runtime</title>
+<style>
+:root{
+  --bg:    #030508;
+  --bg2:   #060a10;
+  --border:#0d1825;
+  --blue:  #00cfe8;
+  --violet:#8a5cff;
+  --pink:  #ff4c8b;
+  --text:  #c0d0e8;
+  --bright:#e8f0ff;
+  --dim:   #1e2d42;
+  --muted: #3a5070;
+  --green: #00c896;
+  --amber: #f0b040;
+  --red:   #e04040;
+  --font:  "Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --mono:  "Consolas","Courier New",monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);
+  font-family:var(--font);overflow-x:hidden}
+body{position:relative}
+
+/* scanline */
+body::before{content:"";position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);
+  pointer-events:none;z-index:9999}
+
+/* synthwave floor (fixed, behind content) */
+.gridfloor{
+  position:fixed;left:50%;bottom:-6%;
+  width:220vw;height:34vh;
+  transform:translateX(-50%) perspective(320px) rotateX(56deg);
+  transform-origin:bottom center;
+  background:
+    repeating-linear-gradient(0deg,rgba(0,207,232,.12) 0 1px,transparent 1px 40px),
+    repeating-linear-gradient(90deg,rgba(138,92,255,.10) 0 1px,transparent 1px 40px);
+  -webkit-mask-image:linear-gradient(transparent 10%,#000 95%);
+  mask-image:linear-gradient(transparent 10%,#000 95%);
+  animation:gridrun 1.6s linear infinite;
+  pointer-events:none;z-index:0}
+@keyframes gridrun{to{background-position:0 40px,0 0}}
+
+/* travelling scan beam */
+.scanbar{
+  position:fixed;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(0,207,232,.45),rgba(138,92,255,.45),transparent);
+  filter:blur(1px);
+  animation:scan 11s cubic-bezier(.6,0,.4,1) infinite;
+  opacity:0;pointer-events:none;z-index:20}
+@keyframes scan{
+  0%{transform:translateY(-10px);opacity:0}
+  4%{opacity:.8}40%{opacity:.8}
+  45%,100%{transform:translateY(105vh);opacity:0}}
+
+/* ── top bar ── */
+#topbar{
+  position:sticky;top:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(3,5,8,.92);
+  backdrop-filter:blur(8px);
+  z-index:10;gap:12px}
+#topbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,var(--blue),var(--violet),var(--pink));
+  background-size:45% 100%;background-repeat:no-repeat;
+  animation:hair 5s linear infinite;opacity:.7}
+@keyframes hair{0%{background-position:-50% 0}100%{background-position:160% 0}}
+.tb-l{display:flex;align-items:center;gap:16px}
+.tb-brand{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.tb-brand b{
+  background:linear-gradient(90deg,var(--blue),var(--violet));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:var(--blue);
+  font-weight:700;letter-spacing:.3em}
+#fw-label{font-family:var(--mono);font-size:12px;
+  padding:2px 10px;border-radius:3px;
+  background:rgba(0,207,232,.08);border:1px solid rgba(0,207,232,.25);
+  color:var(--text);text-shadow:0 0 8px rgba(0,207,232,.35)}
+.tb-r{display:flex;align-items:center;gap:10px}
+#attempt-badge{
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+  letter-spacing:.05em}
+#attempt-badge b{color:var(--blue);text-shadow:0 0 10px rgba(0,207,232,.5)}
+
+/* ── status hero ── */
+#hero{
+  position:relative;z-index:1;
+  padding:28px 24px 20px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(8,14,22,.65),transparent)}
+#status{
+  font-size:clamp(18px,3vw,26px);
+  font-weight:300;color:var(--bright);
+  letter-spacing:.01em;min-height:32px;
+  margin-bottom:16px}
+#status.running::after{
+  content:"\258C";color:var(--blue);
+  margin-left:6px;
+  animation:cur .85s steps(1) infinite}
+@keyframes cur{0%,60%{opacity:1}61%,100%{opacity:0}}
+#status.running{color:var(--bright)}
+#status.success{color:var(--green);text-shadow:0 0 18px rgba(0,200,150,.5)}
+#status.failed{color:var(--red);text-decoration:underline;text-underline-offset:4px}
+
+/* progress bar (neon + running stripes) */
+#pbar-wrap{height:3px;background:var(--dim);border-radius:2px;overflow:hidden;
+  box-shadow:inset 0 0 6px rgba(0,0,0,.6)}
+#pbar{
+  height:100%;width:0%;
+  background-color:var(--blue);
+  background-image:
+    linear-gradient(90deg,var(--blue),var(--violet),var(--green)),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px);
+  border-radius:2px;
+  box-shadow:0 0 12px rgba(0,207,232,.6);
+  transition:width .4s ease;
+  animation:stripes .8s linear infinite}
+@keyframes stripes{to{background-position:0 0,-24px 0}}
+
+/* ── proof grid ── */
+#proofs{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:8px;padding:16px 24px;
+  border-bottom:1px solid var(--border)}
+.proof{
+  position:relative;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;
+  border:1px solid var(--dim);border-radius:6px;
+  font-size:11px;background:rgba(6,10,16,.75);
+  opacity:.3;transition:all .3s;overflow:hidden}
+.proof.ok{
+  border-color:rgba(0,200,150,.45);opacity:1;
+  box-shadow:0 0 16px rgba(0,200,150,.18),inset 0 0 14px rgba(0,200,150,.06);
+  animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.proof.ok::after{
+  content:"";position:absolute;top:0;left:-40%;width:40%;height:100%;
+  background:linear-gradient(105deg,transparent,rgba(0,200,150,.22),transparent);
+  animation:swipe 1s ease-out}
+@keyframes swipe{to{left:120%}}
+@keyframes pop{from{transform:scale(.86)}}
+.proof.ok .pi{color:var(--green);text-shadow:0 0 10px rgba(0,200,150,.7)}
+.proof.fail{border-color:rgba(224,64,64,.45);opacity:1;
+  box-shadow:0 0 14px rgba(224,64,64,.15)}
+.proof.fail .pi{color:var(--red)}
+.proof.active{border-color:rgba(0,207,232,.5);opacity:1;
+  animation:blink .8s ease infinite}
+.proof.active .pi{color:var(--blue)}
+@keyframes blink{0%,100%{border-color:rgba(0,207,232,.3)}50%{border-color:rgba(0,207,232,.95)}}
+.pi{font-size:13px;flex-shrink:0}
+.pt{color:var(--text);font-family:var(--mono);font-size:10px;
+  text-transform:uppercase;letter-spacing:.06em}
+
+/* ── log (terminal chrome) ── */
+#log-wrap{
+  position:relative;z-index:1;
+  padding:16px 24px;
+  flex:1}
+#log-title{
+  font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px}
+#log-title::before{
+  content:"\25CF \25CF \25CF";
+  letter-spacing:.35em;margin-right:10px;font-size:8px;
+  color:var(--pink);text-shadow:0 0 8px rgba(255,76,139,.6)}
+
+/* This is #scr — the ID the exploit JS writes to */
+#scr{
+  font-family:var(--mono);font-size:11.5px;
+  line-height:1.8;color:#7090b0;
+  white-space:pre-wrap;word-break:break-all;
+  max-height:45vh;overflow-y:auto;
+  padding:12px 14px;
+  background:linear-gradient(180deg,#060a10,#04070c);
+  border:1px solid rgba(0,207,232,.14);
+  border-radius:8px;
+  box-shadow:inset 0 0 30px rgba(0,0,0,.5),0 0 24px rgba(0,207,232,.05)}
+#scr::-webkit-scrollbar{width:8px}
+#scr::-webkit-scrollbar-track{background:#04070c}
+#scr::-webkit-scrollbar-thumb{background:#12354a;border-radius:4px}
+#scr::-webkit-scrollbar-thumb:hover{background:rgba(0,207,232,.4)}
+
+/* log token colours */
+#scr .ok{color:var(--green)}
+#scr .err{color:var(--red)}
+#scr .hi{color:var(--bright)}
+#scr .am{color:var(--amber)}
+
+/* ── highlight success/fail banner ── */
+#banner{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  padding:16px 24px;
+  font-size:16px;font-weight:700;
+  text-align:center;letter-spacing:.12em;text-transform:uppercase;
+  z-index:100;backdrop-filter:blur(4px)}
+#banner.ok{display:block;
+  background:linear-gradient(180deg,rgba(0,200,150,.05),rgba(0,200,150,.16));
+  border-top:2px solid var(--green);color:var(--green);
+  text-shadow:0 0 18px rgba(0,200,150,.8);
+  box-shadow:0 -10px 40px rgba(0,200,150,.15)}
+#banner.fail{display:block;
+  background:rgba(224,64,64,.1);
+  border-top:2px solid var(--red);color:var(--red)}
+
+/* ── scroll hint ── */
+@keyframes fade{0%,100%{opacity:0}50%{opacity:1}}
+#scroll-hint{
+  font-size:10px;color:var(--dim);text-align:center;
+  padding:6px;animation:fade 2s ease infinite;
+  display:none}
+</style>
+</head>
+<body>
+
+<div class="gridfloor" aria-hidden="true"></div>
+<div class="scanbar" aria-hidden="true"></div>
+
+<div id="topbar">
+  <div class="tb-l">
+    <span class="tb-brand"><b>PSAITO</b> · research · wamphyre</span>
+    <span id="fw-label">FW ??.??</span>
+  </div>
+  <div class="tb-r">
+    <span id="attempt-badge">attempt <b id="att-num">—</b></span>
+  </div>
+</div>
+
+<div id="hero">
+  <!-- This is .header / #status — both IDs the exploit writes to -->
+  <div class="header" id="status">Initializing…</div>
+  <div id="pbar-wrap"><div id="pbar"></div></div>
+</div>
+
+<div id="proofs">
+  <div class="proof" id="p-primitive"><span class="pi">◈</span><span class="pt">primitive</span></div>
+  <div class="proof" id="p-bases"><span class="pi">◈</span><span class="pt">bases</span></div>
+  <div class="proof" id="p-gadgets"><span class="pi">◈</span><span class="pt">gadgets</span></div>
+  <div class="proof" id="p-stubs"><span class="pi">◈</span><span class="pt">stubs</span></div>
+  <div class="proof" id="p-kernel"><span class="pi">◈</span><span class="pt">kernel reach</span></div>
+  <div class="proof" id="p-libc"><span class="pi">◈</span><span class="pt">libc base</span></div>
+  <div class="proof" id="p-arena"><span class="pi">◈</span><span class="pt">arena</span></div>
+  <div class="proof" id="p-notify"><span class="pi">◈</span><span class="pt">notify</span></div>
+</div>
+
+<div id="log-wrap">
+  <div id="log-title">execution log</div>
+  <!-- #scr is what the exploit JS writes its log lines to -->
+  <div id="scr">Waiting for exploit to start…</div>
+  <div id="scroll-hint">↓ scroll for more</div>
+</div>
+
+<div id="banner"></div>
+
+<!-- Runtime bridge + payload panel: API de análisis y panel de sondas -->
+<script src="modules/offsets13x.js"></script>
+<script src="modules/bridge.js"></script>
+<script src="modules/menu.js"></script>
+
+<!-- Runtime logic — loaded as regular script so it can access DOM directly -->
+<script src="modules/exploit.js"></script>
+
+<script>
+// ── UI enhancements on top of the exploit ───────────────────────────────
+(function() {
+  const Q = new URLSearchParams(location.search);
+  const fw = Q.get("fw") || "??.??";
+  document.getElementById("fw-label").textContent = "FW " + fw;
+
+  // Proof card state updater — watches #scr for proof tokens
+  const PROOF_TOKENS = {
+    "PRIMITIVE-OK":     "p-primitive",
+    "BASES":            "p-bases",
+    "PROOF-OK gadget":  "p-gadgets",
+    "STUBS":            "p-stubs",
+    "PROOF-OK chain-reaches-kernel": "p-kernel",
+    "LIBC-BASE":        "p-libc",
+    "ARENA":            "p-arena",
+    "NOTIFY":           "p-notify",
+  };
+
+  // Override screenLine to also drive proof cards
+  const scr = document.getElementById("scr");
+  const origMO = window.MutationObserver;
+  const obs = new origMO(mutations => {
+    const text = scr.textContent || "";
+    for (const [token, id] of Object.entries(PROOF_TOKENS)) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      if (text.includes(token)) {
+        el.className = "proof ok";
+        el.querySelector(".pi").textContent = "✓";
+      }
+    }
+
+    // Progress bar — count "PROOF-OK" occurrences
+    const proofCount = (text.match(/PROOF-OK/g) || []).length;
+    document.getElementById("pbar").style.width =
+      Math.min(proofCount * 12, 90) + "%";
+
+    // Scroll log — sticky: solo baja al fondo si el usuario ya estaba abajo
+    const nearBottom = scr.scrollHeight - scr.scrollTop - scr.clientHeight < 24;
+    if (nearBottom) scr.scrollTop = scr.scrollHeight;
+
+    // Banner
+    if (text.includes("SUCCESS")) {
+      document.getElementById("pbar").style.width = "100%";
+      document.getElementById("banner").className = "ok";
+      document.getElementById("banner").textContent = "✓ USERLAND ACHIEVED — PSAITO";
+      document.getElementById("banner").style.display = "block";
+    }
+    if (text.includes("FAILED") || text.includes("failed")) {
+      document.getElementById("banner").className = "fail";
+      document.getElementById("banner").textContent = "⟳ Retrying — see log for details";
+      document.getElementById("banner").style.display = "block";
+      setTimeout(() => document.getElementById("banner").style.display = "none", 2000);
+    }
+  });
+  obs.observe(scr, { childList: true, characterData: true, subtree: true });
+
+  // Attempt counter
+  const attEl = document.getElementById("att-num");
+  const tick = () => {
+    const text = scr.textContent || "";
+    const m = text.match(/\[(\d+)\]\s/g);
+    if (m && m.length > 0) {
+      const last = m[m.length - 1].match(/\[(\d+)\]/);
+      if (last) attEl.textContent = last[1];
+    }
+    setTimeout(tick, 500);
+  };
+  tick();
+})();
+</script>
+</body>
+</html>

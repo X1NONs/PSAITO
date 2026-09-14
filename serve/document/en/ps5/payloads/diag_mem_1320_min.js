@@ -1,0 +1,15 @@
+(async()=>{
+const B=(x)=>BigInt(x),L=async(m)=>{try{await log(m)}catch(e){}},I=(x)=>BigInt.asIntN(64,x),E=(n,s)=>L("[diag] PASO "+n+": "+s+" - ejecutando"),R=(n,v)=>L("[diag] PASO "+n+" result: "+v);
+let Rd=-1n,Wr=-1n,Sh=0n,F5={f:null};
+await E(1,"getpid (baseline runtime vivo)");try{const p=I(syscall(SYSCALL.getpid));await R(1,"pid="+p)}catch(e){await R(1,"EX "+e)}
+await E(2,"pipe(fds)");try{const f=malloc(8),r=I(syscall(SYSCALL.pipe,f));if(r<0n)await R(2,"ERR "+get_error_string());else{Rd=BigInt.asIntN(32,read32(f));Wr=BigInt.asIntN(32,read32(f+4n));Sh=malloc(16);await R(2,"ok Rd="+Rd+" Wr="+Wr)}}catch(e){await R(2,"EX "+e)}
+const Pr=(a)=>{if(Wr<0n)return{d:"SIN PIPE",f:null};const r=I(syscall(SYSCALL.write,Wr,a,1n));if(r<0n){let s="errno?";try{s=get_error_string()}catch(x){s="errstr EX "+x}return{d:"ERR "+s,f:/^14(\s|$)/.test(s)||/EFAULT/.test(s)}}try{syscall(SYSCALL.read,Rd,Sh,1n)}catch(x){}return{d:"legible "+r+"B",f:false}}
+await E(3,"control pipe-probe heap malloc (esperado ok)");try{const c=malloc(64);write64(c,0x4141414141414141n);if(Wr<0n)await R(3,"SKIPPED sin pipe");else{const p=Pr(c);await R(3,p.d+(p.f?" -> METODO ROTO":" -> ok"))}}catch(e){await R(3,"EX "+e)}
+await E(4,"leer global libc_base (sin leer)");try{if(typeof libc_base==="undefined")await R(4,"libc_base NO EXISTE");else await R(4,"libc_base="+toHex(B(libc_base)))}catch(e){await R(4,"EX "+e)}
+await E(5,"pipe-probe write(pipeWr, libc_base, 1)");try{if(typeof libc_base==="undefined")await R(5,"SKIPPED");else{const a=B(libc_base),p=Pr(a);F5.f=p.f;await R(5,p.d+(p.f===true?" -> NO LEGIBLE (EFAULT)":p.f===false?" -> LEGIBLE":""))}}catch(e){await R(5,"EX "+e)}
+await E(6,"read64(libc_base) (si PASO 5 sin EFAULT)");try{if(typeof libc_base==="undefined")await R(6,"SKIPPED");else if(F5.f===true)await R(6,"SKIPPED (P5=EFAULT)");else{const q=read64(B(libc_base));await R(6,toHex(q)+((q&0xffffffffn)===0x464c457fn?" ELF OK":" NO ELF"))}}catch(e){await R(6,"EX "+e)}
+await E(7,"pipe-probe libc_base+0x4000 (+read64 si legible)");try{if(typeof libc_base==="undefined")await R(7,"SKIPPED");else{const a=B(libc_base)+0x4000n,p=Pr(a);let x="";if(p.f===false){try{x=" | read64="+toHex(read64(a))}catch(e){x=" | read64 EX "+e}}await R(7,p.d+" en "+toHex(a)+x)}}catch(e){await R(7,"EX "+e)}
+await E(8,"eboot_base / libstarboard_base (sin leer)");try{const P=[];try{P.push("eb="+(typeof eboot_base==="undefined"?"NO EXISTE":toHex(B(eboot_base))))}catch(e){P.push("eb EX "+e)}try{P.push("sb="+(typeof libstarboard_base==="undefined"?"NO EXISTE":toHex(B(libstarboard_base))))}catch(e){P.push("sb EX "+e)}await R(8,P.join("|"))}catch(e){await R(8,"EX "+e)}
+await E(9,"getpid final + send_notification");try{const p=I(syscall(SYSCALL.getpid));await R(9,"pid="+p);await L("[diag] COMPLETO: consola viva");try{send_notification("[diag] done")}catch(e){}}catch(e){await R(9,"EX "+e)}
+await E(10,"close(pipeRd), close(pipeWr)");try{if(Rd>=0n)syscall(SYSCALL.close,Rd);if(Wr>=0n)syscall(SYSCALL.close,Wr);await R(10,"fds cerrados ("+Rd+","+Wr+")")}catch(e){await R(10,"EX "+e)}
+})();

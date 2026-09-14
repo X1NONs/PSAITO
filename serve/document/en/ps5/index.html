@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PSAITO · PS5 WebKit Userland</title>
+<style>
+:root {
+  --bg:     #030508;
+  --bg2:    #080d14;
+  --border: #0e1929;
+  --blue:   #00cfe8;
+  --blue2:  #0a7ea8;
+  --violet: #8a5cff;
+  --pink:   #ff4c8b;
+  --dim:    #2a3a55;
+  --muted:  #4a6080;
+  --text:   #c8d8f0;
+  --bright: #e8f0ff;
+  --green:  #00c896;
+  --amber:  #f0b040;
+  --red:    #e03030;
+  --font:   "Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --mono:   "Consolas","Courier New",monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
+  -webkit-user-select:none;user-select:none;overflow:hidden}
+::selection{background:rgba(0,207,232,.25)}
+
+/* ── scanline overlay ── */
+body::before{
+  content:"";position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+  pointer-events:none;z-index:999}
+
+/* ── ambient glow ── */
+body::after{
+  content:"";position:fixed;
+  top:-30%;left:50%;transform:translateX(-50%);
+  width:80vw;height:60vh;
+  background:
+    radial-gradient(ellipse,rgba(0,207,232,.10) 0%,transparent 65%),
+    radial-gradient(ellipse at 70% 10%,rgba(138,92,255,.08) 0%,transparent 60%);
+  pointer-events:none}
+
+/* ── synthwave floor ── */
+.gridfloor{
+  position:fixed;left:50%;bottom:-10%;
+  width:220vw;height:42vh;
+  transform:translateX(-50%) perspective(320px) rotateX(56deg);
+  transform-origin:bottom center;
+  background:
+    repeating-linear-gradient(0deg,rgba(0,207,232,.18) 0 1px,transparent 1px 40px),
+    repeating-linear-gradient(90deg,rgba(138,92,255,.16) 0 1px,transparent 1px 40px);
+  -webkit-mask-image:linear-gradient(transparent 15%,#000 92%);
+  mask-image:linear-gradient(transparent 15%,#000 92%);
+  animation:gridrun 1.6s linear infinite;
+  pointer-events:none;z-index:0}
+@keyframes gridrun{to{background-position:0 40px,0 0}}
+
+/* ── travelling scan beam ── */
+.scanbar{
+  position:fixed;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(0,207,232,.5),rgba(138,92,255,.5),transparent);
+  filter:blur(1px);
+  animation:scan 9s cubic-bezier(.6,0,.4,1) infinite;
+  opacity:0;pointer-events:none;z-index:5}
+@keyframes scan{
+  0%{transform:translateY(-10px);opacity:0}
+  4%{opacity:.9}
+  40%{opacity:.9}
+  45%,100%{transform:translateY(105vh);opacity:0}}
+
+/* ── layout ── */
+#root{
+  position:relative;height:100vh;
+  display:grid;
+  grid-template-rows:1fr auto 1fr;
+  align-items:center;justify-items:center;
+  padding:24px}
+
+/* ── top bar ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 28px;
+  border-bottom:1px solid var(--border);
+  background:rgba(3,5,8,.8);
+  backdrop-filter:blur(12px);
+  z-index:10}
+#topbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,var(--blue),var(--violet),var(--pink));
+  background-size:45% 100%;background-repeat:no-repeat;
+  animation:hair 5s linear infinite;opacity:.7}
+@keyframes hair{0%{background-position:-50% 0}100%{background-position:160% 0}}
+.tb-brand{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+.tb-brand b{
+  background:linear-gradient(90deg,var(--blue),var(--violet));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:var(--blue);font-weight:700;
+  letter-spacing:.3em}
+.tb-fw{font-size:11px;font-family:var(--mono);color:var(--muted)}
+.tb-fw span{color:var(--text)}
+
+/* ── main card (glass) ── */
+#card{
+  width:min(560px,100%);
+  display:flex;flex-direction:column;
+  align-items:center;gap:0;
+  position:relative;z-index:2;
+  background:linear-gradient(180deg,rgba(10,17,28,.78),rgba(5,9,15,.66));
+  border:1px solid rgba(0,207,232,.16);
+  border-radius:16px;
+  padding:38px 34px 30px;
+  backdrop-filter:blur(10px);
+  box-shadow:
+    0 0 70px rgba(0,207,232,.07),
+    0 20px 60px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+#card::before{
+  content:"";position:absolute;top:-1px;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blue),var(--violet),transparent);
+  opacity:.8}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ── title with glitch ── */
+.title{
+  font-size:clamp(32px,6.5vw,56px);
+  font-weight:200;
+  letter-spacing:.08em;
+  color:var(--bright);
+  text-align:center;
+  line-height:1.1;
+  margin-bottom:6px}
+.brand{
+  position:relative;display:inline-block;
+  font-weight:800;letter-spacing:.16em;
+  background:linear-gradient(90deg,#6df3ff,#b98bff,#ff6fae,#6df3ff);
+  background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:gradmove 8s linear infinite;
+  filter:drop-shadow(0 0 18px rgba(58,232,255,.55))}
+@keyframes gradmove{0%{background-position:0% 0}100%{background-position:200% 0}}
+.brand::before,.brand::after{
+  content:attr(data-text);position:absolute;left:0;top:0;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent}
+.brand::before{
+  background:linear-gradient(90deg,var(--pink),var(--pink));
+  background-clip:text;
+  clip-path:inset(0 0 58% 0);
+  transform:translate(-3px,-2px);
+  animation:gl1 3.4s steps(1) infinite;opacity:.85}
+.brand::after{
+  background:linear-gradient(90deg,var(--blue),var(--blue));
+  background-clip:text;
+  clip-path:inset(52% 0 0 0);
+  transform:translate(3px,2px);
+  animation:gl2 3.4s steps(1) infinite;opacity:.85}
+@keyframes gl1{
+  0%,88%,100%{transform:translate(-3px,-2px);opacity:0}
+  89%{opacity:.9;transform:translate(-5px,1px)}
+  91%{transform:translate(-2px,-3px)}
+  93%{transform:translate(-6px,0)}
+  95%{opacity:.9;transform:translate(-3px,-2px)}}
+@keyframes gl2{
+  0%,88%,100%{transform:translate(3px,2px);opacity:0}
+  90%{opacity:.9;transform:translate(5px,-1px)}
+  92%{transform:translate(2px,3px)}
+  94%{transform:translate(6px,1px)}
+  96%{opacity:.9;transform:translate(3px,2px)}}
+
+.subtitle{
+  font-size:12px;color:var(--muted);
+  letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:36px;
+  text-align:center;line-height:2}
+.subtitle b{color:var(--text);font-weight:600}
+
+/* ── fw badge ── */
+#fw-badge{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 20px;
+  border:1px solid var(--border);
+  background:rgba(8,13,20,.8);
+  border-radius:8px;
+  font-family:var(--mono);font-size:13px;
+  margin-bottom:26px;width:100%;
+  box-shadow:inset 0 0 20px rgba(0,0,0,.35)}
+#fw-badge .dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--dim);flex-shrink:0;
+  transition:background .4s}
+#fw-badge .dot.ok{background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:dotp 1.7s ease infinite}
+#fw-badge .dot.warn{background:var(--amber);box-shadow:0 0 8px var(--amber);
+  animation:dotp 1.2s ease infinite}
+#fw-badge .dot.err{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes dotp{0%,100%{box-shadow:0 0 4px currentColor}50%{box-shadow:0 0 12px currentColor}}
+#fw-badge .lbl{color:var(--muted);margin-right:4px;text-transform:uppercase;font-size:10px;letter-spacing:.1em}
+#fw-badge .val{color:var(--bright);flex:1}
+#fw-badge .tag{
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 8px;border-radius:3px;
+  background:rgba(0,207,232,.13);color:var(--blue);
+  border:1px solid rgba(0,207,232,.3)}
+
+/* ── info rows ── */
+.info-rows{width:100%;display:flex;flex-direction:column;gap:8px;margin-bottom:30px}
+.info-row{
+  position:relative;overflow:hidden;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px 10px 18px;
+  border:1px solid var(--border);
+  background:rgba(8,13,20,.7);border-radius:6px;
+  font-size:12px;
+  transition:border-color .25s,background .25s,transform .25s}
+.info-row::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--blue),transparent);
+  opacity:.5}
+.info-row:hover{border-color:rgba(0,207,232,.35);background:rgba(10,18,28,.9);transform:translateX(2px)}
+.info-row .k{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.12em}
+.info-row .v{color:var(--text);font-family:var(--mono);font-size:11px}
+.info-row .v.ok{color:var(--green);text-shadow:0 0 10px rgba(0,200,150,.4)}
+.info-row .v.warn{color:var(--amber)}
+.info-row .v.none{color:var(--dim)}
+
+/* ── CTA button ── */
+#btn{
+  width:100%;padding:18px;
+  background:linear-gradient(120deg,var(--blue),var(--violet));
+  color:#031018;
+  border:none;border-radius:8px;
+  font:800 15px/1 var(--font);
+  letter-spacing:.16em;text-transform:uppercase;
+  cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:filter .2s,transform .1s,box-shadow .3s;
+  -webkit-user-select:none}
+#btn:not(.disabled){animation:ctapulse 2.8s ease-in-out infinite}
+@keyframes ctapulse{
+  0%,100%{box-shadow:0 0 0 rgba(0,207,232,0),0 0 0 1px rgba(0,207,232,.35)}
+  50%{box-shadow:0 0 30px rgba(0,207,232,.35),0 0 0 1px rgba(0,207,232,.8)}}
+#btn::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);
+  background-size:250% 100%;background-position:120% 0;
+  transition:background-position .6s ease;
+  pointer-events:none}
+#btn:hover{filter:brightness(1.12)}
+#btn:hover::before{background-position:-60% 0}
+#btn:active{transform:scale(.985)}
+#btn.disabled{
+  background:var(--dim);color:var(--muted);
+  cursor:not-allowed;pointer-events:none;animation:none}
+#btn .arrow{margin-left:10px;display:inline-block;font-size:12px;
+  transition:transform .25s}
+#btn:hover .arrow{transform:translate(3px,-3px)}
+
+/* ── msg under button ── */
+#msg{
+  margin-top:14px;font-size:12px;
+  color:var(--muted);text-align:center;min-height:18px;
+  letter-spacing:.04em}
+#msg.err{color:var(--red)}
+#msg.warn{color:var(--amber)}
+#msg.ok{color:var(--green);text-shadow:0 0 12px rgba(0,200,150,.35)}
+
+/* ── footer ── */
+#foot{
+  font-size:11px;color:var(--dim);text-align:center;
+  letter-spacing:.04em;z-index:2;position:relative;
+  margin-top:26px}
+#foot b{
+  background:linear-gradient(90deg,var(--blue),var(--violet));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:var(--muted)}
+
+/* ── loading pulse ── */
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.loading{animation:pulse 1.2s ease infinite}
+
+/* ── offline pill ── */
+#offline{
+  position:fixed;bottom:16px;right:16px;
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:3px;
+  background:rgba(0,200,150,.12);color:var(--green);
+  border:1px solid rgba(0,200,150,.25);
+  box-shadow:0 0 16px rgba(0,200,150,.2);
+  opacity:0;transition:opacity .4s;
+  pointer-events:none}
+#offline.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="tb-brand"><b>PSAITO</b> &nbsp;·&nbsp; by wamphyre</span>
+  <span class="tb-fw">WebKit Userland&nbsp;&nbsp;<span id="tb-fw-val">detecting…</span></span>
+</div>
+
+<div class="gridfloor" aria-hidden="true"></div>
+<div class="scanbar" aria-hidden="true"></div>
+
+<div id="root">
+  <div></div><!-- spacer -->
+
+  <div id="card">
+    <div class="title"><span class="brand" data-text="PSAITO">PSAITO</span></div>
+    <div class="subtitle">PS5 WebKit Userland &bull; by <b>wamphyre</b> &bull; 2026<br>
+      payload bridge + auto menu &bull; <b>09.00 &rarr; 13.60</b></div>
+
+    <div id="fw-badge">
+      <span class="dot" id="fw-dot"></span>
+      <span class="lbl">firmware</span>
+      <span class="val" id="fw-val">detecting…</span>
+      <span class="tag" id="fw-tag">—</span>
+    </div>
+
+    <div class="info-rows">
+      <div class="info-row">
+        <span class="k">offsets</span>
+        <span class="v" id="i-off">—</span>
+      </div>
+      <div class="info-row">
+        <span class="k">range</span>
+        <span class="v ok">09.00 → 13.60</span>
+      </div>
+      <div class="info-row">
+        <span class="k">runtime</span>
+        <span class="v ok">WebKit research PoC — runtime notify</span>
+      </div>
+      <div class="info-row">
+        <span class="k">cache</span>
+        <span class="v" id="i-cache">—</span>
+      </div>
+    </div>
+
+    <button id="btn" class="disabled">
+      ▶ Launch
+      <span class="arrow">↗</span>
+    </button>
+    <div id="msg" class="loading">Loading offsets…</div>
+  </div>
+
+  <div id="foot">
+    <b>PSAITO</b> by <b>wamphyre</b> &bull; experimental project for educational
+    &amp; research use &bull; WebKit research baseline by <b>mansoor0x</b> &bull; 2026
+  </div>
+</div>
+
+<div id="offline">offline ready</div>
+
+<script type="module">
+import { OFFSETS, detectFirmware, resolve, profilesFor, TOTAL_FW } from "./modules/offsets.mjs";
+
+const $ = id => document.getElementById(id);
+
+// ── Firmware detection
+const fw  = detectFirmware();
+const res = fw ? resolve(fw) : null;
+let entry = null;
+
+$("tb-fw-val").textContent = fw || "unknown";
+
+if (!fw) {
+  $("fw-val").textContent   = "not a PS5 browser";
+  $("fw-dot").className     = "dot err";
+  $("fw-tag").textContent   = "unsupported";
+  $("msg").textContent      = "Open on your PS5 browser";
+  $("msg").className        = "err";
+} else if (res) {
+  entry = res.entry;
+  const profs = profilesFor(fw);
+  $("fw-val").textContent   = fw;
+  $("fw-dot").className     = "dot " + (res.exact ? "ok" : "warn");
+  $("fw-tag").textContent   = res.exact ? "exact match" : "nearest: " + res.key;
+  $("i-off").textContent    = res.exact ? "verified ✓" : "interpolated from " + res.key;
+  $("i-off").className      = "v " + (res.exact ? "ok" : "warn");
+  $("msg").textContent      = res.exact
+    ? "Firmware " + fw + " fully supported"
+    : "Auto-rotating " + profs.length + " offset profile(s) — unverified on " + fw;
+  $("msg").className        = res.exact ? "ok" : "warn";
+  $("btn").classList.remove("disabled");
+} else {
+  $("fw-val").textContent   = fw;
+  $("fw-dot").className     = "dot err";
+  $("fw-tag").textContent   = "no offsets";
+  $("msg").textContent      = "Firmware " + fw + " not supported";
+  $("msg").className        = "err";
+}
+
+// ── Launch
+$("btn").addEventListener("click", () => {
+  if (!entry) return;
+  const profs = profilesFor(fw);
+  // listas PARALELAS (una posicion por perfil, sin dedup): exploit.js
+  // rota perfil=(attempt-1)%N; la consistencia 3-via rechaza el errado
+  const join = (f) => profs.map(f).join(",");
+  const q = new URLSearchParams();
+  q.set("go","1"); q.set("fw", fw);
+  q.set("hc",  entry.hc.join(","));
+  // listas paralelas = perfiles de offsets; exploit.js rota 1 por intento
+  q.set("gd",  join(p => p.gd));
+  q.set("notify", join(p => p.nt));
+  q.set("gps", join(p => p.gps)); q.set("gpe", join(p => p.gpe));
+  q.set("cls", join(p => p.cls)); q.set("cle", join(p => p.cle));
+  q.set("ers", join(p => p.ers)); q.set("ere", join(p => p.ere));
+  const pb = new URLSearchParams(location.search).get("pb");
+  if (pb) q.set("pb", pb);
+  // [Mods consola] propaga payload de auto-arranque, logserver y parametros
+  // operativos del exploit. Sin esto, ?log/?rop/?max/?rd/?n se pierden al
+  // pasar de index -> runtime y el exploit usa los defaults.
+  for (const p of ["auto", "logserver", "log", "rop", "max", "rd", "n", "cap", "gap", "lines"]) {
+    const v = new URLSearchParams(location.search).get(p);
+    if (v !== null) q.set(p, v);
+  }
+  location.href = "runtime.html?" + q.toString();
+});
+
+// ── Service Worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js")
+    .then(r => {
+      const sw = r.installing || r.waiting || r.active;
+      const show = () => {
+        $("i-cache").textContent  = "offline ready ✓";
+        $("i-cache").className    = "v ok";
+        $("offline").className    = "show";
+        setTimeout(() => $("offline").className = "", 3000);
+      };
+      if (r.active) { show(); }
+      else if (sw) { sw.addEventListener("statechange", e => { if(e.target.state==="activated") show(); }); }
+    }).catch(() => {
+      $("i-cache").textContent = "unavailable";
+      $("i-cache").className   = "v none";
+    });
+} else {
+  $("i-cache").textContent = "not supported";
+  $("i-cache").className   = "v none";
+}
+</script>
+</body>
+</html>
