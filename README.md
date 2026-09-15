@@ -272,3 +272,44 @@ sent regardless.)
 - WebKit research baseline: **[mansoor0x](https://github.com/mansoor0x/POC)** — see `NOTICE.md`
 - PSAITO (runtime bridge, panel, UI, probes): **Wamphyre**
 - 13.XX offset tables (gadgets + syscall stubs): **[X1NONs/X1NON-PSJB](https://github.com/X1NONs/X1NON-PSJB)**
+
+## 13.40 status: problem faced + what is needed (ciel branch)
+
+Tested live on 13.40 hardware, results reproduced across many runs.
+
+### What works
+- WebKit userland exploit passes first-try with the `0x334e238` GOT family
+  (`KERNEL-BASE pass`, `NOTIFY-NATIVE-CALL-PASS`). Requires `go=1` plus the
+  firmware's own offset profile on every attempt; single-profile lock beats
+  rotation, `max=3 n=256` beats the post-exploit memory dialog.
+- DIRECT bridge boots reliably and payloads run. Stub-calls through
+  `nativeCall` work with verified stub RVAs: `getpid` returns a real pid,
+  `aio_init` returns 0 (AIO family alive, not ENOSYS).
+- Worker-thread discovery is fully green: libc base via GOT slot
+  `0x334E098-0x5D9E0`, worker handshake, thread-list walk (`0x6C218`,
+  first entry already a `0x80000` stack), return-slot fingerprint
+  (`LK+0x1FD01`, count exactly 1, stable offset `0x7FB68`).
+
+### The problem
+Full-arg syscalls (everything the kex needs: `wait`, `727`-out,
+`osem_create`, `socketpair`) need a stack pivot the bridge does not have.
+`nativeCall` controls only `rdi`+`rcx`; garbage in integer slots panics
+(proven: `wait` with garbage `num` kills the tab).
+- Any `.text` read kills the tab: libkernel (1 byte) and WebKit (first
+  byte). XOM is enforced — no on-console gadget discovery, no classic ROP.
+- Worker-thread hijack is set up perfectly every run (genuine slot,
+  in-stack frame pointer, live fingerprint) but dies on entry: the
+  carried-over `pop rsp 0xA1138` does not execute on real 13.40 WebKit.
+  Alignment, OOM timing, and thread identity were each isolated and ruled
+  out (ping control survives 10s+; fast verdicts; `attempt=1` runs).
+- 19 blind `pop rsp` candidates swept (table value, fine deltas,
+  `±0x4000`, older-gen values): all miss. The 13.40 gadget tables are
+  13.20 carryovers (byte-identical hashes); `hc` matches but code
+  addresses are unverified on-console by construction.
+
+### What is needed
+1. One true 13.40 code RVA (`pop rsp` minimum) from decrypted 13.40
+   WebKit — not obtainable self-serve (PUP decrypt needs a hacked box,
+   inner SELF stays AES-locked, no public dumps past 6.xx).
+2. Everything downstream is already built: kex scaffold, kernel data
+   offsets, reclaim/leak/priv-esc staging, Y2JB full-arg path.
