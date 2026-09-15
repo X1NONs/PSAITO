@@ -23,3 +23,13 @@ Rule: fresh YT relaunch per run series; bases first every boot (ASLR).
   (shadow-synced, y2jb_bagagwa.js) remain the untested alternative.
 - Never observed: kernel panic (all deaths are app-level), ENOSYS on AIO,
   any [ar]/submit success line.
+
+## 2026-09-15 late: AIO verdict
+- fderr differential (valid/bogus/NULL): ALL sub=0 st=3,3 identical.
+- kevent EVFILT_TIMER: ret=1, dt=10ms, event ident/filter echoed (1/30fff9).
+  Kernel interaction is GENUINE (timers fire); sandbox is not blanket-neutered.
+- Root cause converged: aio_init fails EFAILED on every combo (engine + matrix
+  agree); all AIO sterility follows (fake completes, no transfer, 727 silent,
+  submit/create/get abort on uninitialized-state deref).
+- AIO kex impossible from YT sandbox (init fails) and browser (no full-arg
+  caller). Parked pending: live-AIO host process, non-AIO bug, or scene drops.
