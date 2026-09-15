@@ -5,6 +5,7 @@
     const say = (s) => { try { log("[ok] " + s); } catch (e) {} };
     const shout = (s) => { try { send_notification(s); } catch (e) {} };
     try { LOG_SERVER = "http://" + LOG_HOST + ":8080/log"; } catch (e) {}
+    try { if (typeof checkLogServer === "function") await checkLogServer(); } catch (e) {}
     shout("ok: start");
     say("sanity start");
     try {
