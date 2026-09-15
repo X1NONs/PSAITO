@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PSAITO GO</title>
+<style>
+body{background:#060a12;color:#d8e6ff;font-family:sans-serif;margin:0;padding:20px;text-align:center}
+h1{font-size:22px;margin:8px}small{color:#7a90b0}
+#fw{color:#00e6a0;font-weight:bold}
+input{font-size:18px;padding:10px;width:80%;max-width:320px;margin:10px;border-radius:10px;border:1px solid #234;text-align:center;background:#0a1220;color:#fff}
+button{display:block;width:90%;max-width:340px;margin:10px auto;padding:16px;font-size:18px;border-radius:14px;border:0;background:#0e8aa8;color:#fff}
+button.b2{background:#5b4fd6}button.b3{background:#0a9e6b}button.b4{background:#b02040}
+button:active{transform:scale(.97)}
+</style></head><body>
+<h1>PSAITO <span id="fw">..</span></h1><small>tap one — no typing</small><br>
+<input id="ip" placeholder="PC IP e.g. 192.168.1.50">
+<button onclick="sessionStorage.clear();alert('counter reset')">Reset counter</button>
+<button onclick="go('worker_sweep_1340.js',1)">1p · Sweep pop-rsp (auto-advance)</button>
+<button onclick="go('worker_ret_1340.js',1)">1q · Return-to-worker TEST</button>
+<button onclick="go('hello_1320.js')">1 · Hello (safe)</button>
+<button onclick="go('hello_1320.js',1)">1b · Hello DIRECT (no scan)</button>
+<button onclick="go('hunt2_1340.js',1)">1c · Hunt pivot (DIRECT)</button>
+<button onclick="go('callstub_1340.js',1)">1d · Callstub (DIRECT)</button>
+<button onclick="go('slotdump_1340.js',1)">1e · Slotdump (DIRECT)</button>
+<button onclick="go('osem_probe_1340.js',1)">1f · Osem groom (DIRECT)</button>
+<button onclick="go('validate10_1340.js',1)">1g · Validate gadgets (DIRECT)</button>
+<button onclick="go('worker_discover_1340.js',1)">1h · Worker discover (DIRECT)</button>
+<button onclick="go('worker_hijack_1340.js',1)">1i · Worker hijack TEST (worker may die)</button>
+<button onclick="go('worker_loop_1340.js',1)">1j · Worker loop TEST (no return)</button>
+<button onclick="go('worker_entry_1340.js',1)">1k · Worker entry TEST (1 gadget)</button>
+<button onclick="go('worker_spin_1340.js',1)">1l · Worker spin TEST (pop-rsp only)</button>
+<button onclick="go('worker_fast_1340.js',1)">1m · Worker FAST verdict (ms)</button>
+<button onclick="go('worker_ping_1340.js',1)">1n · Worker ping control</button>
+<button onclick="go('worker_ctor_1340.js',1)">1o · Worker ctor TEST</button>
+<button class="b2" onclick="go('aio_reach_1320.js')">2 · AIO Reach</button>
+<button class="b3" onclick="go('leak_727_1340.js')">3 · 727 Leak</button>
+<button class="b4" onclick="go('bagagwa_kex_1340.js',1)">4 · KEX 13.40 (safe scaffold)</button>
+<script type="module">
+import { resolve, profilesFor, detectFirmware } from "./modules/offsets.mjs";
+let fw = detectFirmware();
+document.getElementById('fw').textContent = fw || 'unknown FW';
+let ipEl=document.getElementById('ip');
+ipEl.value=localStorage.getItem('pcip')||location.hostname;
+ipEl.onchange=()=>localStorage.setItem('pcip',ipEl.value.trim());
+window.go=function(auto,rop){
+  let ip=ipEl.value.trim(); localStorage.setItem('pcip',ip);
+  const res = fw ? resolve(fw) : null;
+  const q = new URLSearchParams();
+  q.set("go","1");
+  if(fw) q.set("fw", fw);
+  if(res){
+    // exact match: lock to single profile so every attempt uses 13.40 slots
+    // (rotation caused a10/a12 to try 13.20 slots and fail + hit ceiling)
+    const e = res.entry;
+    q.set("hc", e.hc.join(","));
+    q.set("gd", e.gd); q.set("notify", e.nt);
+    q.set("gps", e.gps); q.set("gpe", e.gpe);
+    q.set("cls", e.cls); q.set("cle", e.cle);
+    q.set("ers", e.ers); q.set("ere", e.ere);
+  }
+  q.set("log","1");
+  q.set("logserver",'http://'+ip+':8000/log');
+  q.set("auto",auto);
+  q.set("max","3");
+  q.set("rd","3000");
+  q.set("n","256");
+  if(rop) q.set("rop","0");
+  location.href='runtime.html?'+q.toString();
+};
+</script></body></html>

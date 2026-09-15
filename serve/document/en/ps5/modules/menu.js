@@ -274,7 +274,7 @@
         replaySaved();
         if (auto && auto !== "0") {
             glog("auto-run in 1.5s: " + auto + "  (?auto=0 disables)");
-            autoTimer = setTimeout(() => runFile(auto), 1500);
+            autoTimer = setTimeout(() => runFile(auto), 300);
         }
     };
 

