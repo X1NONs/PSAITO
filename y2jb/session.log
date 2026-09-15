@@ -1,0 +1,41 @@
+selftest
+Log server check from Y2JB
+[ok] sanity start
+[ok] aio_init=18446744073709551615
+[ok] pipe2=0 27,29
+[ok] kqueue=27
+[ok] sanity done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[tr3] s0 start
+[tr3] s1 hasglobal
+[tr3] s2 LK=0x81d92c000
+[tr3] call init
+[tr3] ret init=0
+[tr3] struct pipe
+[tr3] call pipe2
+[tr3] ret pipe2=0
+[tr3] trace done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[s4] s4 start
+[s4] init=18446744073709551615
+[s4] pipe rfd=26
+[s4] struct ready
+Log server check from Y2JB
+Log server check from Y2JB
+[b5] start
+[b5] start=go
+[b5] bases
+[b5] bases=0x83a42c000
+[b5] init
+[b5] init=0
+[b5] pipe
+[b5] pipe=0 rfd=27
+[b5] kqueue
+[b5] kqueue=31
+[b5] submit?
