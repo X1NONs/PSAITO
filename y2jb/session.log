@@ -39,3 +39,458 @@ Log server check from Y2JB
 [b5] kqueue
 [b5] kqueue=31
 [b5] submit?
+Log server check from Y2JB
+[n6] start
+[n6] start=go
+[n6] create
+Log server check from Y2JB
+[f7] start
+[f7] start=go
+[f7] del
+[f7] del=18446744073709551615
+[f7] cancel
+[f7] cancel=18446744073709551615
+[f7] poll
+[f7] poll=18446744073709551615
+[f7] get
+Log server check from Y2JB
+[g8] start
+[g8] start=go
+[g8] init
+[g8] init=0
+[g8] dbg727
+[g8] dbg727=18446744073709551615 changed[0]
+[g8] done
+[g8] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[n9] start
+[n9] start=go
+[n9] x29B
+[n9] x29B=18446744073709551615
+[n9] x29D
+[n9] x29D=18446744073709551615
+[n9] x29F
+[n9] x29F=18446744073709551615
+[n9] x2A0
+[n9] x2A0=18446744073709551615
+[n9] x2A1
+[n9] x2A1=18446744073709551615
+[n9] x2A2
+[n9] x2A2=18446744073709551615
+[n9] x2A3
+[n9] x2A3=0
+[n9] x2D7b
+[n9] x2D7b=18446744073709551615
+[n9] done
+[n9] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[f10] start
+[f10] start=go
+[f10] init
+[f10] init=18446744073709551615
+[f10] sockpair
+[f10] sockpair=18446744073709551615 fdA=0
+[f10] subcmd
+[f10] subcmd=0 ids=25003,90539
+[f10] done
+[f10] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[l11] start
+[l11] try 1
+[l11] id=1 ret=18446744073709551615 ch[0]
+[l11] try 2
+[l11] id=2 ret=18446744073709551615 ch[0]
+[l11] try 25003
+[l11] id=25003 ret=18446744073709551615 ch[0]
+[l11] try 90539
+[l11] id=90539 ret=18446744073709551615 ch[0]
+[l11] leak sweep done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[t12] start
+[t12] 2a-id-out/1
+[t12] 2a-id-out/1 ret=18446744073709551615 ch[0]
+[t12] 3a-id-cnt-out/1
+[t12] 3a-id-cnt-out/1 ret=18446744073709551615 ch[0]
+[t12] 3a-id-cnt4-out/1
+[t12] 3a-id-cnt4-out/1 ret=18446744073709551615 ch[0]
+[t12] 3a-id-out-cnt/1
+[t12] 3a-id-out-cnt/1 ret=18446744073709551615 ch[0]
+[t12] 2a-id-out/25003
+[t12] 2a-id-out/25003 ret=18446744073709551615 ch[0]
+[t12] 3a-id-cnt-out/25003
+[t12] 3a-id-cnt-out/25003 ret=18446744073709551615 ch[0]
+[t12] 3a-id-cnt4-out/25003
+[t12] 3a-id-cnt4-out/25003 ret=18446744073709551615 ch[0]
+[t12] 3a-id-out-cnt/25003
+[t12] 3a-id-out-cnt/25003 ret=18446744073709551615 ch[0]
+[t12] shape sweep done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[b13] start
+[b13] 2a/0x10001
+[b13] 2a/0x10001 ret=18446744073709551615 ch[0]
+[b13] 3a/0x10001
+[b13] 3a/0x10001 ret=18446744073709551615 ch[0]
+[b13] 2a/0x10002
+[b13] 2a/0x10002 ret=18446744073709551615 ch[0]
+[b13] 3a/0x10002
+[b13] 3a/0x10002 ret=18446744073709551615 ch[0]
+[b13] 2a/0x20001
+[b13] 2a/0x20001 ret=18446744073709551615 ch[0]
+[b13] 3a/0x20001
+[b13] 3a/0x20001 ret=18446744073709551615 ch[0]
+[b13] 2a/0x30001
+[b13] 2a/0x30001 ret=18446744073709551615 ch[0]
+[b13] 3a/0x30001
+[b13] 3a/0x30001 ret=18446744073709551615 ch[0]
+[b13] 2a/0x7f0001
+[b13] 2a/0x7f0001 ret=18446744073709551615 ch[0]
+[b13] 3a/0x7f0001
+[b13] 3a/0x7f0001 ret=18446744073709551615 ch[0]
+[b13] bias sweep done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[f14] start
+[f14] start=go
+[f14] init
+[f14] init=18446744073709551615
+[f14] pipe
+[f14] pipe=0 r=28 w=30 (LEFT OPEN)
+[f14] fill
+[f14] fill=0 ids=25004,90540
+[f14] 727/1
+[f14] 727/1=18446744073709551615 ch[0]
+[f14] 727/2
+[f14] 727/2=18446744073709551615 ch[0]
+[f14] 727live/25004
+[f14] 727live/25004=18446744073709551615 ch[0]
+[f14] 727live/90540
+[f14] 727live/90540=18446744073709551615 ch[0]
+[f14] done
+[f14] done=ok (fds left open deliberately)
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Log server check from Y2JB
+[f14] start
+[f14] start=go
+[f14] init
+[f14] init=0
+[f14] pipe
+[f14] pipe=0 r=30 w=31 (LEFT OPEN)
+[f14] fill
+[f14] fill=0 ids=25003,90539
+[f14] 727/1
+[f14] 727/1=18446744073709551615 ch[0]
+[f14] 727/2
+[f14] 727/2=18446744073709551615 ch[0]
+[f14] 727live/25003
+[f14] 727live/25003=18446744073709551615 ch[0]
+[f14] 727live/90539
+[f14] 727live/90539=18446744073709551615 ch[0]
+[f14] done
+[f14] done=ok (fds left open deliberately)
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[f15] start
+[f15] start=FIRE-TEST mode0 timeout0
+[f15] init
+[f15] init=18446744073709551615
+[f15] pipe
+[f15] pipe=0 r=33 w=34
+[f15] fill
+[f15] fill=0 ids=25004,90540
+[f15] FIRE-wait-mode0
+[f15] FIRE-wait-mode0=0
+[f15] survived?
+[f15] survived?=console alive past fire
+[f15] done
+[f15] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[r16] start
+[r16] start=RECLAIM+WAKE (may panic)
+[r16] init
+[r16] init=18446744073709551615
+[r16] pipe
+[r16] pipe=0 r=17 w=27
+[r16] fill
+[r16] fill=0
+[r16] reclaim-4osem
+[r16] reclaim-4osem=WAKE0000=18446744073709551615 WAKE0001=18446744073709551615 WAKE0002=18446744073709551615 WAKE0003=18446744073709551615
+[r16] FIRE
+[r16] FIRE=0
+[r16] WAKE-write
+[r16] WAKE-write=1
+[r16] settle
+[r16] settle=yielded200
+[r16] delete-ids
+[r16] delete-ids=cancel=0 del=0
+[r16] verdict
+[r16] verdict=alive-through-wake (latent) OR see panic timing above
+[r16] done
+[r16] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[o17] start
+[o17] m0i0
+[o17] m0i0=18446744073709551615
+[o17] m0i1
+[o17] m0i1=18446744073709551615
+[o17] m1i0
+[o17] m1i0=18446744073709551615
+[o17] m1i1
+[o17] m1i1=18446744073709551615
+[o17] m2i0
+[o17] m2i0=18446744073709551615
+[o17] m2i1
+[o17] m2i1=18446744073709551615
+[o17] m3i0
+[o17] m3i0=18446744073709551615
+[o17] m3i1
+[o17] m3i1=18446744073709551615
+[o17] osem matrix done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[o18] start
+[o18] 1a
+[o18] 1a=18446744073709551615
+[o18] 2a-0
+[o18] 2a-0=18446744073709551615
+[o18] 2a-1
+[o18] 2a-1=18446744073709551615
+[o18] 2a-2
+[o18] 2a-2=18446744073709551615
+[o18] osem2 done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[p19] start
+[p19] made=50
+[p19] made=100
+[p19] made=150
+[p19] made=200
+[p19] sprayed=200
+[p19] closed=400
+[p19] spraysafe done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Log server check from Y2JB
+[f20] start
+[f20] start=FIRE+SPRAY (may panic)
+[f20] init
+[f20] init=0
+[f20] pipe
+[f20] pipe=0 r=30 w=31
+[f20] fill
+[f20] fill=0
+[f20] spray200
+[f20] spray200=pairs=200 (LEFT OPEN)
+[f20] FIRE
+[f20] FIRE=0
+[f20] WAKE
+[f20] WAKE=1
+[f20] settle
+[f20] settle=yielded
+[f20] cleanup
+[f20] cleanup=closed-spray=400
+[f20] verdict
+[f20] verdict=survived (compare vs silent fire-alone)
+[f20] done
+[f20] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[w21] start
+[w21] start=no-fire state proof
+[w21] init
+[w21] init=18446744073709551615
+[w21] pipe
+[w21] pipe=0 r=17 w=28
+[w21] fill
+[w21] fill=0
+[w21] wait-pre
+[w21] wait-pre=0 states=3,3 (want pending)
+[w21] wake
+[w21] wake=1 written+yielded
+[w21] wait-post
+[w21] wait-post=0 states=65539,65539 (want 3,3=COMPLETE)
+[w21] verdict
+[w21] verdict=transition? real : duds
+[w21] done
+[w21] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[o22] start
+[o22] off0x0
+[o22] off0x0 sub=0 st=3,3
+[o22] off0x8
+[o22] off0x8 sub=0 st=3,3
+[o22] off0x10
+[o22] off0x10 sub=0 st=3,3
+[o22] off0x18
+[o22] off0x18 sub=0 st=3,3
+[o22] off0x20
+[o22] off0x20 sub=0 st=3,3
+[o22] off0x28
+[o22] off0x28 sub=0 st=3,3
+[o22] fdoff sweep done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[c23] start
+[c23] cmd0x1
+[c23] cmd0x1 sub=0 st=3,2147614723
+[c23] cmd0x1000
+[c23] cmd0x1000 sub=18446744073709551615 st=2147614723,2147614723
+[c23] cmd0x1001
+[c23] cmd0x1001 sub=0 st=3,3
+[c23] cmd0x1002
+[c23] cmd0x1002 sub=0 st=3,3
+[c23] cmd0x1003
+[c23] cmd0x1003 sub=18446744073709551615 st=2147614723,2147614723
+[c23] cmd0x1004
+[c23] cmd0x1004 sub=18446744073709551615 st=2147614723,2147614723
+[c23] cmd0x1005
+[c23] cmd0x1005 sub=18446744073709551615 st=2147614723,2147614723
+[c23] cmd0x1010
+[c23] cmd0x1010 sub=18446744073709551615 st=2147614723,2147614723
+[c23] cmd sweep done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[d24] start
+[d24] start=data-oracle
+[d24] init
+[d24] init=18446744073709551615
+[d24] pipe
+[d24] pipe=0 r=17 w=30
+[d24] prefill
+[d24] prefill=8 bytes-into-pipe
+[d24] submit
+[d24] submit=0 waited+yielded
+[d24] readback
+[d24] readback=buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (want 48454c4c4f212121...)
+[d24] done
+[d24] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[s25] start
+[s25] start=single-read-oracle
+[s25] init
+[s25] init=18446744073709551615
+[s25] pipe
+[s25] pipe=0 r=28 w=32
+[s25] prefill
+[s25] prefill=8 bytes-into-pipe
+[s25] submit
+[s25] submit=0 waited+yielded
+[s25] readback
+[s25] readback=buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (want 48454c4c4f212121...)
+[s25] done
+[s25] done=ok
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[l26] start
+[l26] len0x0
+[l26] len0x0 sub=0 buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[l26] len0x8
+[l26] len0x8 sub=0 buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[l26] len0x10
+[l26] len0x10 sub=0 buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[l26] len0x18
+[l26] len0x18 sub=0 buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[l26] len0x20
+[l26] len0x20 sub=0 buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[l26] len0x28
+[l26] len0x28 sub=0 buf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[l26] len sweep done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+Globals: Image, window, self, document, location, history, frames, length, top, opener, parent, navigator, camera3D, onblur, onclick, onerror, onfocus, onkeydown, onkeypress, onkeyup, onload, onloadeddata, onloadedmetadata, onloadstart, onmousedown, onmouseenter, onmouseleave, onmousemove, onmouseout, onmouseover, onmouseup, onpause, onplay, onplaying, onresize, onscroll, ontransitionend, ongotpointercapture, onlostpointercapture, onpointercancel, onpointerdown, onpointerenter, onpointerleave, onpointermove, onpointerout, onpointerover, onpointerup, onprogress, onratechange, onseeked, onseeking, ontimeupdate, onvolumechange, onwaiting, onwheel, speechSynthesis, screen, innerWidth, innerHeight, screenX, screenY, outerWidth, outerHeight, devicePixelRatio, onbeforeunload, onlanguagechange, onoffline, ononline, onrejectionhandled, onunhandledrejection, onunload, localStorage, onScreenKeyboard, performance, sessionStorage, caches, crypto, OnScreenKeyboard, DialHttpRequest, DialHttpResponse, DialServer, AbortController, AbortSignal, Animatable, Animation, AnimationEffectReadOnly, AnimationEffectTimingReadOnly, AnimationEvent, AnimationTimeline, Attr, AudioBuffer, AudioBufferSourceNode, AudioContext, AudioDestinationNode, AudioNode, AudioTrack, AudioTrackList, Blob, BlobEvent, CDATASection, CSSConditionRule, CSS, CSSFontFaceRule, CSSGroupingRule, CSSKeyframeRule, CSSKeyframesRule, CSSMediaRule, CSSRule, CSSRuleList, CSSStyleDeclaration, CSSStyleRule, CSSStyleSheet, CValView, Cache, CacheRequest, CacheStorage, Camera3D, CharacterData, CloseEvent, CobaltUADataValuesInterface, Comment, Crypto, CryptoKey, CustomEvent, DOMException, DOMImplementation, DOMParser, DOMRect, DOMRectReadOnly, DOMStringMap, DOMTokenList, DeviceOrientationEvent, Document, DocumentTimeline, DocumentType, Element, ErrorEvent, Event, EventTarget, FetchInternal, FocusEvent, H5vccAccessibility, H5vccAccountInfo, H5vccAudioConfigArray, H5vccAudioConfig, H5vcc, H5vccCrashLog, H5vccDeepLinkEventTarget, H5vccMetrics, H5vccNetLog, H5vccPlatformService, H5vccRuntime, H5vccRuntimeEventTarget, H5vccScreen, H5vccSettings, H5vccStorage, H5vccSystem, H5vccTraceEvent, HTMLAnchorElement, HTMLAudioElement, HTMLBRElement, HTMLBodyElement, HTMLCollection, HTMLDivElement, HTMLElement, HTMLHeadElement, HTMLHeadingElement, HTMLHtmlElement, HTMLImageElement, HTMLLinkElement, HTMLMediaElement, HTMLMetaElement, HTMLParagraphElement, HTMLScriptElement, HTMLSpanElement, HTMLStyleElement, HTMLTitleElement, HTMLUnknownElement, HTMLVideoElement, History, InputEvent, IntersectionObserver, IntersectionObserverEntry, KeyboardEvent, Keyframe, KeyframeEffectReadOnly, Location, LottieFrameCustomEvent, LottiePlayer, MediaDeviceInfo, MediaDevices, MediaEncryptedEvent, MediaError, MediaKeyMessageEvent, MediaKeySession, MediaKeyStatusMap, MediaKeySystemAccess, MediaKeys, MediaList, MediaMetadata, MediaQueryList, MediaRecorder, MediaSession, MediaSource, MediaStream, MediaStreamTrack, MessageEvent, MessagePort, MimeTypeArray, MouseEvent, MutationObserver, MutationRecord, NamedNodeMap, NavigationPreloadManager, Navigator, NavigatorUAData, Node, NodeList, Performance, PerformanceEntry, PerformanceLifecycleTiming, PerformanceMark, PerformanceMeasure, PerformanceNavigationTiming, PerformanceObserver, PerformanceObserverEntryList, PerformanceResourceTiming, PerformanceTiming, PluginArray, PointerEvent, Profiler, ProfilerTraceWrapper, ProgressEvent, Screen, Screenshot, SecurityPolicyViolationEvent, ServiceWorker, ServiceWorkerContainer, ServiceWorkerRegistration, SourceBuffer, SourceBufferList, SpeechRecognitionAlternative, SpeechRecognition, SpeechRecognitionError, SpeechRecognitionEvent, SpeechRecognitionResult, SpeechRecognitionResultList, SpeechSynthesis, SpeechSynthesisErrorEvent, SpeechSynthesisEvent, SpeechSynthesisUtterance, SpeechSynthesisVoice, Storage, StorageEvent, StyleSheet, StyleSheetList, SubtleCrypto, SystemCaptionSettings, Text, TextDecoder, TextEncoder, TimeRanges, TrackDefault, TrackDefaultList, TrackEvent, TransitionEvent, UIEvent, URL, VideoPlaybackQuality, VideoTrack, VideoTrackList, WebSocket, WheelEvent, Window, Worker, WorkerNavigator, XMLDocument, XMLHttpRequest, XMLHttpRequestEventTarget, XMLHttpRequestUpload, XMLSerializer, atob, btoa, cancelAnimationFrame, clearInterval, clearTimeout, close, gc, getComputedStyle, matchMedia, minimize, requestAnimationFrame, screenshot, setInterval, setTimeout, IsReadableStream, IsReadableStreamDisturbed, IsReadableStreamLocked, IsReadableStreamReadable, IsReadableStreamClosed, IsReadableStreamErrored, IsReadableStreamDefaultReader, ReadableStreamTee, Headers, Request, Response, fetch, load_localscript, checkLogServer, log, toHex, trigger, map1, oob_arr, victim_arr, obj_arr, bc_start, rop_test, ret, write_string, alloc_string, send_notification, get_error_string, sysctlbyname, get_fwversion, call_pipe_rop, create_pipe, read_buffer, write_buffer, read_null_terminated_string, find_pattern, get_current_ip, is_jailbroken, check_jailbroken, load_prx, dlsym, get_title_id, find_mod_by_name, file_exists, read_file, write_file, get_nidpath, nanosleep, send_network, kill_youtube, find_file, map_shellcode, run_shellcode, load_elfldr, load_bin, load_aioshellcode
+P=undefined p=undefined sys=undefined syscall=function chain=undefined currentChain=undefined int64=undefined worker_rop=undefined mem=undefined track=undefined flushMark=undefined
+ERROR in accept loop: (intermediate value)(...) is not a function
+[bgw-run] alive, calling getpid baseline
+[bgw-run] baseline getpid=173
+[bgw-run] baseline is_jailbroken=false
+[bgw-run] --- stage0_uaf ---
+[bgw] === Stage 0: aio_multi_wait mode 0 UAF ===
+[bgw-run]   syscall stubs verified
+[bgw-run] stage0_uaf FAILED: aio_init failed: EFAILED
+TypeError: (intermediate value)(...) is not a function
+    at eval (eval at <anonymous> (h5vcc-cache://splash_screen/aHR0cHM6Ly93d3cueW91dHViZS5jb20vdHY=/remotejsloader.js:198:23), <anonymous>:1460:1)
+    at h5vcc-cache://splash_screen/aHR0cHM6Ly93d3cueW91dHViZS5jb20vdHY=/remotejsloader.js:198:23
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[i27] start
+[i27] init(0,0)
+[i27] init(0,0)=18446744073709551615
+[i27] init(1,0)
+[i27] init(1,0)=18446744073709551615
+[i27] init(0,1)
+[i27] init(0,1)=18446744073709551615
+[i27] init(1,1)
+[i27] init(1,1)=18446744073709551615
+[i27] init(2,0)
+[i27] init(2,0)=18446744073709551615
+[i27] init(0,2)
+[i27] init(0,2)=18446744073709551615
+[i27] init matrix done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[e28] start
+[e28] validfd
+[e28] validfd sub=0 st=3,3
+[e28] badfd9999
+[e28] badfd9999 sub=0 st=3,3
+[e28] nulldata
+[e28] nulldata sub=0 st=3,3
+[e28] fderr done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000
+Executing payload...
+Log server check from Y2JB
+[k29] start
+[k29] kq=33
+[k29] kevent=1 dt=10ms ev=1/30fff9
+[k29] kevent done
+Executed successfully
+Awaiting connection at 192.168.0.155:50000

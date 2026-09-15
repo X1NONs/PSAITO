@@ -32,19 +32,28 @@
 
   // 3) thread-list walk, both list-head candidates
   const NEXT=0x38n, STK=0xA8n, SZ=0xB0n;
-  let wstack = 0n, wvia = "";
-  for(const headOff of [0x64218,0x6C218]){
+  let wstack = 0n;
+  const rows = [];
+  for(const headOff of [0x64218,0x6C218,0x75258]){
     try{
       let t = R64(LK+BigInt(headOff));
+      let found = 0n, steps = -1;
       for(let i=0;i<64 && t!==0n;i++){
         const sz = R64(t+SZ);
-        if(sz===0x80000n){ wstack = R64(t+STK); wvia="head=0x"+headOff.toString(16)+" steps="+i; break; }
+        if(sz===0x80000n){ found = R64(t+STK); steps = i; break; }
         t = R64(t+NEXT);
       }
-    }catch(e){}
-    if(wstack) break;
+      let fp = "n/a";
+      if(found){
+        let c = 0;
+        try{ for(let o=0x7F000n;o<0x80000n;o+=8n){ if(R64(found+o)===EXP) c++; } }catch(e){ c = -1; }
+        fp = "fp=" + c;
+      }
+      rows.push("0x"+headOff.toString(16)+":"+(found?("st="+hx(found)+" s="+steps+" "+fp):"miss"));
+      if(found && !wstack) wstack = found;
+    }catch(e){ rows.push("0x"+headOff.toString(16)+":THREW"); }
   }
-  await say("wstack="+(wstack?hx(wstack)+" via "+wvia:"NOT FOUND"));
+  await say("heads ["+rows.join(" | ")+"]");
   if(!wstack) return;
 
   // 4) return-slot fingerprint: single-read shortcut + one 0x7F000..0x80000 sweep
