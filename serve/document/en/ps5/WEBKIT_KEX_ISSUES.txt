@@ -1,0 +1,99 @@
+WEBKIT -> KEX issues on PS5 13.40 (PSAITO, live hardware campaign)
+Date: 2026-09-14/15. Target: 13.40. Userland: mansoor0x SSV + bridge.
+Status: userland + DIRECT stub-calls WORKING. Full-arg kex BLOCKED (see 08).
+
+[01] Exploit cold-starts unarmed (armed=false, max=3 ceiling from prior runs)
+Symptom: BOOT note ends armed=false-loop=relentless + "Add ?go=1 to URL".
+Fix: go.html now forces go=1; Reset counter button clears sessionStorage.
+Log:
+  a37-...-note-BOOT-rev=renderer-notify-auto-proof-2-k=2-n=512-attempt=37-armed=false
+
+[02] Wrong offset profile (11.xx defaults on 13.40)
+Symptom: VALIDATION-MISMATCH rw=true holder=true function=true
+  native-executable=false base=false repeat=false retry-safe=false.
+Cause: launcher bypassed index.html fw detection, fell back to 11.xx
+  hc/gd/notify/gps defaults. Fix: fw-detected single-profile queries.
+Log:
+  s51-note-VALIDATION-MISMATCH-rw=true-holder=true-function=true-
+  native-executable=false-base=false-repeat=false-retry-safe=false
+
+[03] Profile rotation lands on wrong family + attempt ceiling blocks retry
+Symptom: PROFILE-idx=1/2 gps=0x3352238 (13.20 family) on 13.40 console,
+  then ATTEMPT-CEILING attempt=4-max=3-stopped=true on a retry-safe flake.
+Fix: lock to exact-match single profile (gps=0x334e238); max 3->10->3 tune.
+Log:
+  s3-note-PROFILE-idx=1/2-gps=0x3352238-gpe=0x1b860-gd=0x1d6fa-nt=0x48b0
+  s21-note-ATTEMPT-CEILING-attempt=4-max=3-stopped=true
+
+[04] Post-exploit memory dialog ("not enough memory")
+Symptom: system dialog right after SUCCESS; covers on-screen log.
+Cause: 72MB carrier + drains per attempt; retries pile up (attempt 9-12).
+Mitigations: max=3 n=256 rd=3000, fresh browser + Reset per run, PC log as
+  source of truth. Payloads must land inside ~2s window (batched single lines,
+  menu auto-run 1500ms->300ms).
+Log:
+  s47-note-NOTIFY-NATIVE-CALL-PASS-result=0-collator-restored=true-permanent-block=true
+  (followed by dialog on console, no further lines until fresh boot)
+
+[05] Logserver port split (8080 vs 8000)
+Symptom: BRIDGE-BOOT lines lost (httpLog only, never on screen).
+Cause: dual_host serves /log on 8000; payloads defaulted to 8080; old
+  DEMO/log_server held 8080. Fix: go.html pins :8000/log; dual_host fixed
+  (was corrupted upstream) + self-signed cert generated (serve/*.pem, ignored).
+Log:
+  [23:39:03] LOG (empty post)   <- pre-fix boot attempt with dead logserver
+
+[06] Bridge boot dies after NOTIFY-PASS (no BRIDGE-BOOT)
+Symptom: PASS then silence; empty POST.
+Cause: tryWkFallback scanned full 46MB WebKit .text synchronously post-exploit
+  (OOM/crash). Fix: rop=0 skips scan (DIRECT boots instantly); scan capped
+  8MB->1MB; notes added to PARTIAL log line.
+Log:
+  LOG BRIDGE-BOOT-PARTIAL syscall-20-unavailable:rop-gadgets-missing
+  notes=arena-sentinel-ok;rop-forced-direct;direct-skipped-wk-scan
+  LOG [canary] hello: loader reached eval()
+  LOG [canary] ERROR en getpid: Error: syscall-20-unavailable:rop-gadgets-missing
+
+[07] XOM: any .text read kills the tab (libkernel AND WebKit)
+Symptom: single read8(LK) -> instant death, no log line after. validate10
+  (10 reads at X1NON gadget RVAs) died after begin line with zero results.
+  hunt payloads died with no progress. ROP-stub boot impossible: libkernel
+  probe faults, WebKit pivot/save scan faults.
+Conclusion: code is execute-only on 13.40; only GOT/data/heap reads work.
+  No on-console gadget discovery possible.
+
+[08] Worker-ROP hijack: perfect setup, dead execution (9 payload variants)
+Setup markers triple-consistent every run: libc via 0x334E098-0x5D9E0,
+  worker handshake OK, thread walk head=0x6C218 steps=0 (0x80000 stack),
+  retfp count==1 stable off 0x7FB68, orig_ret==LK+0x1FD01, orig_sp in-stack.
+Result: every hijack (setjmp discipline, minimal loop, entry-only,
+  pop-only spin, fast verdict, ctor-loop, return-to-worker, 19-candidate
+  sweep 0-18) dies within ~1-2s with no verdict; ping control survives 10s+.
+Notes: alignment guard added after audit (was missing in quick payloads);
+  ?msg1 oracle flaw found (echo always answers pre-hijack); sweep 0-10 +
+  11-18 all miss including older-gen values.
+Log (typical):
+  LOG [whij] disc libc=0x80b9c0000 ws=0x7ef54c000 ret=0x7ef5cbb68
+  LOG [whij] chain 25q entry=0x1000599148 orig_ret=0x806403d01
+  (silence; memory error)
+  LOG [wsweep] SWEEP EXHAUSTED, reset localStorage to restart
+
+[09] DIRECT stub-call limits (proven boundaries)
+Works: getpid->170, aio_init->0. Clean -1: osem_create (alive, needs args).
+Fatal: wait/subcmd with garbage num (kernel walks garbage -> panic);
+  __error call/read kills tab; 727 has no libkernel wrapper (absent from all
+  13.XX maps) so stub mode can never call it.
+Log:
+  LOG [cs1340] getpid(base+0x1b860) -> 170
+  LOG [cs1340] aio_init(base+0x1d2e0) -> 0
+  LOG [kex] S1 init=0 submit/subcmd/wait/cancel/del=SKIPPED(garbage-num-unsafe)
+
+[10] 13.40 code tables are 13.20 carryovers (verified, not assumed)
+All four 13.XX gadgetmaps byte-identical (md5 2cf6db2...); slopkit2 13.20
+  canonical fetch matches exactly; no pivot/save upstream anywhere.
+  Frozen-.text hypothesis unproven on-console by construction (XOM).
+
+NEEDS (unchanged): one true 13.40 code RVA (pop rsp minimum) from decrypted
+13.40 WebKit. Not self-serve (PUP decrypt needs hacked box; SELF AES-locked;
+no public dumps past 6.xx). Everything downstream is built (kex scaffold,
+kernel data offsets, Y2JB full-arg path).
